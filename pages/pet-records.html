@@ -1,0 +1,380 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <script>(function () { var role = localStorage.getItem("userRole"); if (role) document.documentElement.setAttribute("data-role", role); }());</script>
+  <script>
+    const role = localStorage.getItem("userRole");
+    if (role) document.documentElement.setAttribute("data-role", role);
+    if (role === "superadmin") {
+      document.documentElement.classList.add("role-superadmin");
+    } else if (role) {
+      document.documentElement.classList.add("role-clinic");
+    }
+    if (localStorage.getItem("userName") && localStorage.getItem("userRoleLabel")) {
+      document.documentElement.classList.add("header-ready");
+    }
+  </script>
+  <style>
+    html.role-superadmin .sidebar .nav-item:has(> .nav-link[href="pet-records.html"]),
+    html.role-superadmin .sidebar .nav-item:has(> .nav-link[href="scan-records.html"]),
+    html.role-superadmin .sidebar .nav-item:has(> .nav-link[href="consultations.html"]) { display: none !important; }
+    html.role-superadmin #adminNavigation { display: block !important; }
+    html:not(.header-ready) .ha-profile { visibility: hidden; }
+  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Pet Records · SkinPawsible</title>
+
+  <link rel="icon" type="image/jpeg" href="../images/LOGO.jpg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+  <!-- Bootstrap Icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+  >
+
+  <!-- SkinPawsible CSS -->
+  <link href="../css/style.css" rel="stylesheet">
+  <link href="../css/app-shell.css?v=9" rel="stylesheet">
+  <link href="../css/header-actions.css?v=2" rel="stylesheet">
+  <link href="../css/pet-records.css?v=8" rel="stylesheet">
+
+  <!-- Pet Records table scrollbar and action buttons -->
+  <style>
+    .pr-table-wrapper {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: #94a3b8 #f1f5f9;
+    }
+
+    .pr-table-wrapper::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .pr-table-wrapper::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 10px;
+    }
+
+    .pr-table-wrapper::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 10px;
+    }
+
+    .pr-table-wrapper::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+
+    .pr-table {
+      width: 100%;
+      min-width: 850px;
+      margin-bottom: 0;
+    }
+
+    .pr-table th,
+    .pr-table td {
+      vertical-align: middle;
+    }
+
+    .pr-table td:last-child {
+      min-width: 190px;
+      white-space: nowrap;
+    }
+
+    .pr-table td:last-child .pr-view,
+    .pr-table td:last-child .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    .pr-table td:last-child .pr-view {
+      cursor: pointer;
+    }
+
+    .pr-table td:last-child .btn {
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .pr-table {
+        min-width: 850px;
+      }
+
+      .pr-table td:last-child {
+        min-width: 190px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- APP LAYOUT -->
+  <div class="app-layout">
+
+    <!-- SHARED SIDEBAR -->
+    <div id="sidebar-container"></div>
+    <script src="../js/sidebar-ui.js?v=6"></script>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <!-- TOPBAR -->
+      <div class="topbar topbar-stacked">
+        <div class="topbar-search-row">
+          <div class="pr-search">
+            <i class="bi bi-search"></i>
+            <input
+              type="search"
+              id="petSearch"
+              placeholder="Search pet, breed, or owner"
+              aria-label="Search pet records"
+            >
+          </div>
+          <div class="topbar-actions"></div>
+        </div>
+
+        <div>
+          <h1 class="page-title">Pet Records</h1>
+        </div>
+      </div>
+
+      <!-- PET RECORDS CARD -->
+      <div class="table-card">
+
+        <div class="head pr-head">
+
+          <div class="pr-tools">
+
+            <!-- Gender Filters -->
+            <div class="pr-chips">
+
+              <button
+                type="button"
+                class="pr-chip active"
+                data-filter="all"
+              >
+                <i class="bi bi-grid-fill"></i>
+                All
+              </button>
+
+              <button
+                type="button"
+                class="pr-chip"
+                data-filter="male"
+              >
+                <i class="bi bi-gender-male"></i>
+                Male
+              </button>
+
+              <button
+                type="button"
+                class="pr-chip"
+                data-filter="female"
+              >
+                <i class="bi bi-gender-female"></i>
+                Female
+              </button>
+
+            </div>
+
+            <div class="pr-date-filter">
+              <button
+                type="button"
+                id="petDateFilterToggle"
+                class="pr-date-filter-toggle"
+                aria-expanded="false"
+                aria-controls="petDateFilterPanel"
+              >
+                <i class="bi bi-calendar3" aria-hidden="true"></i>
+                Date
+                <i class="bi bi-chevron-down pr-date-filter-chevron" aria-hidden="true"></i>
+              </button>
+              <div class="pr-date-filter-panel" id="petDateFilterPanel" hidden>
+                <label class="pr-date-field">
+                  <span>From</span>
+                  <input type="date" id="petDateFrom" aria-label="Filter pets added from date">
+                </label>
+                <label class="pr-date-field">
+                  <span>To</span>
+                  <input type="date" id="petDateTo" aria-label="Filter pets added through date">
+                </label>
+                <button type="button" class="pr-date-reset" id="petDateReset">
+                  Clear dates
+                </button>
+              </div>
+            </div>
+
+            <div class="pr-date-sort" role="group" aria-label="Sort pet records by date">
+              <button type="button" class="pr-sort active" id="petSortNewest" aria-pressed="true">
+                <i class="bi bi-sort-down" aria-hidden="true"></i> Newest
+              </button>
+              <button type="button" class="pr-sort" id="petSortOldest" aria-pressed="false">
+                <i class="bi bi-sort-up" aria-hidden="true"></i> Oldest
+              </button>
+            </div>
+
+          </div>
+          <div class="pr-admin-controls">
+            <button
+              type="button"
+              id="downloadPetReportBtn"
+              class="btn btn-sm btn-outline-success"
+              aria-label="Download visible pet records as an Excel report"
+              title="Download the currently visible pet records as an Excel workbook"
+              disabled
+            >
+              <i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i>
+              Download Excel Report
+            </button>
+            <button
+              type="button"
+              id="addPetBtn"
+              class="btn btn-primary add-pet-trigger"
+              aria-label="Add pet record"
+              hidden
+            >
+              <i class="bi bi-plus-lg" aria-hidden="true"></i>
+              Add Pet
+            </button>
+          </div>
+
+        </div>
+
+        <!-- PET RECORDS TABLE WITH HORIZONTAL SCROLLBAR -->
+        <div class="table-responsive pr-table-wrapper">
+
+          <table class="table pr-table">
+
+            <thead>
+              <tr>
+                <th scope="col">Pet</th>
+                <th scope="col">Breed</th>
+                <th scope="col">Sex</th>
+                <th scope="col">Owner</th>
+                <th scope="col">Added</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody id="petRecordsTable">
+
+              <tr>
+                <td colspan="6" class="pr-message">
+                  Loading pet records...
+                </td>
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+        <div class="record-list-controls">
+          <button type="button" class="record-list-show-more" id="petRecordsShowMore" hidden>
+            Show remaining pet records
+          </button>
+        </div>
+
+        <!-- TABLE FOOTER -->
+        <div class="pr-footer" id="petFooter">
+          Showing 0 of 0 pets
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- PET PROFILE POPUP -->
+  <div
+    class="modal fade"
+    id="petModal"
+    tabindex="-1"
+    aria-labelledby="petModalTitle"
+    aria-hidden="true"
+  >
+
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable pr-modal-dialog">
+
+      <div class="modal-content pr-modal">
+
+        <div class="modal-header">
+
+          <h5 class="modal-title" id="petModalTitle">
+            Pet profile
+          </h5>
+
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+
+        </div>
+
+        <div
+          class="modal-body pr-modal-body"
+          id="petModalBody"
+        ></div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Bootstrap JavaScript -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  ></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+
+  <!-- SHARED HEADER -->
+  <script
+    type="module"
+    src="../js/header-actions.js?v=6"
+  ></script>
+
+  <!-- SHARED SIDEBAR -->
+  <script
+    type="module"
+    src="../js/sidebar.js?v=13"
+  ></script>
+
+  <!-- PET RECORDS JAVASCRIPT -->
+  <script
+    type="module"
+    src="../js/pet-records.js?v=19"
+  ></script>
+
+</body>
+</html>

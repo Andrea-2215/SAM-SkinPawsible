@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SkinPawsible – Consultations</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f5fb;--card:#fff;--ink:#1f1633;--mut:#6b6580;--line:#e8e5f0;--pri:#6b3fa0;--prit:#fff;--pril:#efe8f8;--own:#6b3fa0;--ownt:#fff;--oth:#f1eff7;--note:#fff4cc;--noteb:#e6c65c;--notet:#5c4500;--ok:#177a4b;--okb:#dff3e8;--warn:#9a5b00;--warnb:#fdeccd;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#150e22;--card:#201733;--ink:#f1ecfa;--mut:#a89fc0;--line:#35294d;--pri:#b48be8;--prit:#150e22;--pril:#33224d;--own:#7d4cc0;--oth:#2c2142;--note:#3d3210;--noteb:#8a7020;--notet:#f3dd90;--okb:#12382a;--ok:#6fdba5;--warnb:#3d2d0c;--warn:#f0c26b}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;font:14px/1.45 Poppins,system-ui,sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;padding:16px 20px;gap:12px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+h1{margin:0;font-size:22px}
+.as{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 14px;font-size:13px}
+.as select{border:0;background:var(--pril);color:var(--ink);border-radius:999px;padding:6px 10px;font:inherit}
+.wrap{flex:1;min-height:0;display:grid;grid-template-columns:340px 1fr;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.list{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.lh{padding:16px 16px 10px}.lh b{font-size:16px}
+.lh input{width:100%;margin-top:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:9px 14px;font:inherit}
+.tabs{display:flex;gap:6px;padding:0 16px 10px}
+.tabs button{border:1px solid var(--line);background:none;border-radius:999px;padding:4px 12px;font-size:13px}
+.tabs button[aria-pressed=true]{background:var(--pri);color:var(--prit);border-color:var(--pri)}
+.items{overflow:auto;flex:1}
+.it{display:flex;gap:12px;padding:12px 16px;border:0;border-top:1px solid var(--line);background:none;width:100%;text-align:left;border-left:3px solid transparent}
+.it:hover{background:var(--bg)}.it[aria-current=true]{background:var(--pril);border-left-color:var(--pri)}
+.av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:600;flex:none;background:var(--pril);color:var(--pri)}
+.sm{width:22px;height:22px;font-size:11px}
+.it .r1{display:flex;justify-content:space-between;gap:8px}.it small{color:var(--mut)}
+.prev{color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;font-size:13px}
+.tag{display:inline-block;font-size:11px;border-radius:999px;padding:1px 8px;margin-top:3px;background:var(--pril);color:var(--pri)}
+.tag.un{background:var(--warnb);color:var(--warn)}.tag.rs{background:var(--okb);color:var(--ok)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--pri);flex:none;margin-top:6px}
+.thread{display:flex;flex-direction:column;min-height:0;min-width:0}
+.th{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.th .grow{flex:1;min-width:140px}.th small{color:var(--mut);display:block}
+.btn{border:1px solid var(--line);background:none;border-radius:10px;padding:7px 12px;font-size:13px}
+.btn.p{background:var(--pri);color:var(--prit);border-color:var(--pri)}
+.back{display:none}
+.presence{padding:6px 18px;font-size:12px;background:var(--bg);color:var(--mut);border-bottom:1px solid var(--line)}
+.msgs{flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:10px}
+.m{max-width:68%;display:flex;flex-direction:column;gap:2px}
+.m.o{align-self:flex-start}.m.c{align-self:flex-end;align-items:flex-end}
+.who{font-size:12px;color:var(--mut);display:flex;align-items:center;gap:6px}
+.b{padding:9px 14px;border-radius:16px;background:var(--oth)}
+.m.c .b{background:var(--own);color:var(--ownt);border-bottom-right-radius:4px}.m.o .b{border-bottom-left-radius:4px}
+.m.n .b{background:var(--note);color:var(--notet);border:1px dashed var(--noteb)}
+.m small{color:var(--mut);font-size:11px}
+.ev{align-self:center;text-align:center;border:1px solid var(--line);border-radius:12px;padding:8px 14px;font-size:13px;max-width:90%}
+.ev b{color:var(--pri)}.ev span{color:var(--mut);display:block;font-size:12px}
+.day{align-self:center;font-size:12px;color:var(--mut)}
+.comp{border-top:1px solid var(--line);padding:12px 16px}
+.mode{display:flex;gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap}
+.mode button{border:1px solid var(--line);background:none;border-radius:999px;padding:3px 12px;font-size:12px}
+.mode button[aria-pressed=true]{background:var(--pri);color:var(--prit);border-color:var(--pri)}
+.mode button.nt[aria-pressed=true]{background:var(--note);color:var(--notet);border-color:var(--noteb)}
+.row{display:flex;gap:10px}
+.row textarea{flex:1;resize:none;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:14px;padding:10px 14px;font:inherit;height:44px}
+.comp.note textarea{background:var(--note);border-color:var(--noteb);color:var(--notet)}
+.send{width:44px;height:44px;border-radius:50%;border:0;background:var(--pri);color:var(--prit);font-size:18px}
+.hint{font-size:12px;color:var(--mut);margin-top:6px}
+.empty{margin:auto;color:var(--mut);text-align:center;padding:30px}
+.legend{font-size:12px;color:var(--mut)}.tabs{flex-wrap:wrap}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:500}.pill.ok{background:var(--okb);color:var(--ok)}.pill.warn{background:var(--warnb);color:var(--warn)}.pill.bad{background:#fbe2e0;color:#b3261e}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .pill.bad{background:#431a17;color:#f2a29c}}
+.ac{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:14px 16px;min-width:270px;text-align:left}.ah{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:8px}.ah b{flex:1;color:var(--pri)}.al{font-size:12px;color:var(--mut);margin-top:6px}.av2{font-weight:600}.why{margin-top:10px;padding:8px 10px;border-radius:10px;background:var(--bg);border-left:3px solid #b3261e}.ac small{display:block;text-align:right;margin-top:6px}
+.vet{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;overflow:auto;flex:1}.qc{border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}.qc .r1{display:flex;justify-content:space-between;gap:8px}.ans{margin-top:8px;color:var(--ok)}.grp{font-weight:600;margin:20px 0 0}
+@media(max-width:820px){body{padding:10px}.wrap{grid-template-columns:1fr}.thread{display:none}body.open .list{display:none}body.open .thread{display:flex}.back{display:inline-block}.m{max-width:86%}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<div class="top"><h1>Consultations</h1>
+ <label class="as" title="Prototype only. In the real app, the account you log in with decides this.">Demo: log in as <select id="me"><option value="s1">Staff Vet (Staff)</option><option value="s2">Julie (Staff)</option><option value="v1">Dr. Jammy Noe (Veterinarian)</option></select></label></div>
+<div class="wrap">
+ <section class="list"><div class="lh"><b>Conversations</b><input id="q" type="search" placeholder="Search owner or pet" aria-label="Search conversations"></div>
+  <div class="tabs" id="tabs"></div><div class="items" id="items"></div></section>
+ <section class="thread" id="thread"></section>
+</div>
+<section class="vet" id="vet" style="display:none"></section>
+<script>
+var STAFF={s1:{n:'Staff Vet',r:'Staff',c:'#6b3fa0'},s2:{n:'Julie',r:'Staff',c:'#c2410c'},v1:{n:'Dr. Jammy Noe',r:'Veterinarian',c:'#0f766e'}};
+var me='s1',filter='open',sel=0,mode='reply',q='';
+var Q=[{ci:1,by:'s2',t:'Is Friday morning open for Bobie?',ans:null}];
+var C=[
+ {o:'Julie Ana Merle',pet:'Dio',h:'s1',st:'open',unread:0,viewing:null,msgs:[
+  {k:'o',t:'Good morning! Can I book Dio for a skin check today?',w:'5:20 PM'},
+  {k:'a',a:'req',pet:'Dio',d:'Oct 28, 2026 at 08:00 AM',w:'5:25 PM'},
+  {k:'c',s:'s1',t:'Sure, let me check the schedule.',w:'5:27 PM'},
+  {k:'n',s:'s1',t:'Dr. Noe is free at 8, approving.',w:'5:40 PM'},
+  {k:'a',s:'s1',a:'ok',pet:'Dio',d:'Oct 28, 2026 at 08:00 AM',w:'6:10 PM'}]},
+ {o:'Pau Sj',pet:'Bobie',h:null,st:'open',unread:2,viewing:'v1',msgs:[
+  {k:'o',t:'nilagyan ko card pag macancel HAHAHAHH',w:'2:21 AM'},
+  {k:'c',s:'s2',t:'Hi! Your appointment has been cancelled because it overlaps with another booking, or the doctor is unavailable.',w:'2:22 AM'},
+  {k:'o',t:'okeee wait meron na am pm',w:'2:23 AM'},
+  {k:'a',s:'s2',a:'x',pet:'Bobie',d:'Oct 27, 2026 at 03:00 PM',why:'The time slot overlaps with another booking.',w:'3:26 PM'},
+  {k:'o',t:'Can I rebook for Friday morning?',w:'3:30 PM'},
+  {k:'n',s:'s2',t:'@Dr. Noe: Is Friday morning open for Bobie?',w:'3:35 PM'}]},
+ {o:'Mika Mirr',pet:'Mochi',h:'s2',st:'resolved',unread:0,viewing:null,msgs:[
+  {k:'o',t:'Photo of Mochi’s rash 📷',w:'10:41 AM'},
+  {k:'c',s:'v1',t:'Thanks for the photo. Please keep the area dry and bring Mochi in this week.',w:'11:05 AM'}]}];
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function last(c){var m=c.msgs[c.msgs.length-1];return m.k=='a'?'[Appointment '+({req:'Requested',ok:'Approved',x:'Cancelled'})[m.a]+'] Pet: '+m.pet:m.k=='e'?m.t:(m.k=='n'?'Note: ':'')+m.t}
+function vis(){return C.map(function(c,i){return{c:c,i:i}}).filter(function(x){var c=x.c;
+ if(filter=='resolved'){if(c.st!='resolved')return 0}else{if(c.st=='resolved')return 0;if(filter=='mine'&&c.h!=me)return 0;if(filter=='un'&&c.h)return 0}
+ return (c.o+c.pet).toLowerCase().indexOf(q.toLowerCase())>-1})}
+function tabs(){var f=[['open','Open'],['mine','Mine'],['un','Unassigned'],['resolved','Resolved']];
+ $('tabs').innerHTML=f.map(function(x){return '<button data-f="'+x[0]+'" aria-pressed="'+(filter==x[0])+'">'+x[1]+'</button>'}).join('')}
+function items(){var v=vis();$('items').innerHTML=v.length?v.map(function(x){var c=x.c;
+ var tag=c.st=='resolved'?'<span class="tag rs">Resolved</span>':c.h?'<span class="tag">'+STAFF[c.h].n+'</span>':'<span class="tag un">Unassigned</span>';
+ return '<button class="it" data-i="'+x.i+'" aria-current="'+(x.i==sel)+'"><div class="av">'+c.o[0]+'</div><div style="flex:1;min-width:0"><div class="r1"><b>'+esc(c.o)+'</b><small>'+c.msgs[c.msgs.length-1].w+'</small></div><div class="prev">'+esc(last(c))+'</div>'+tag+' <small>Pet: '+esc(c.pet)+'</small></div>'+(c.unread?'<span class="dot" title="Unread"></span>':'')+'</button>'}).join(''):'<div class="empty">No conversations here. Try another filter.</div>'}
+function thread(){var c=C[sel];if(!c){$('thread').innerHTML='<div class="empty">Select a conversation</div>';return}
+ var isVet=STAFF[me].r=='Veterinarian',mine=c.h==me;
+ var pres=c.viewing&&c.viewing!=me?'<div class="presence">👁 '+STAFF[c.viewing].n+' is viewing this conversation</div>':'';
+ var hb=c.st=='resolved'?'<button class="btn" data-a="open">Reopen</button>':(c.h?(mine?'<button class="btn" data-a="un">Release</button>':'<button class="btn" data-a="take">Take over</button>'):'<button class="btn p" data-a="take">Assign to me</button>')+' <button class="btn" data-a="res">Mark resolved</button>';
+ var h='<div class="th"><button class="btn back" data-a="back">‹ Back</button><div class="av">'+c.o[0]+'</div><div class="grow"><b>'+esc(c.o)+'</b><small>Pet owner · Pet: '+esc(c.pet)+' · '+(c.h?'Handled by '+STAFF[c.h].n:'Unassigned')+'</small></div>'+hb+'</div>'+pres+'<div class="msgs" id="msgs"><div class="day">Today</div>';
+ c.msgs.forEach(function(m){
+  if(m.k=='e')h+='<div class="ev"><b>'+esc(m.t)+'</b><span>'+esc(m.d)+' · '+m.w+'</span></div>';
+  else if(m.k=='a')h+=card(m,c);
+  else if(m.k=='o')h+='<div class="m o"><div class="who">'+esc(c.o)+'</div><div class="b">'+esc(m.t)+'</div><small>'+m.w+'</small></div>';
+  else{var s=STAFF[m.s];h+='<div class="m c'+(m.k=='n'?' n':'')+'"><div class="who">'+(m.k=='n'?'🔒 Internal note · ':'')+esc(s.n)+' · '+s.r+'<span class="av sm" style="background:'+s.c+';color:#fff">'+s.n.replace('Dr. ','')[0]+'</span></div><div class="b">'+esc(m.t)+'</div><small>'+m.w+'</small></div>'}});
+ h+='</div>';
+ if(c.st=='resolved')h+='<div class="comp"><div class="hint">This conversation is resolved. Reopen it to reply.</div></div>';
+ else h+='<div class="comp'+(mode=='note'||mode=='ask'?' note':'')+'"><div class="mode"><button data-m="reply" aria-pressed="'+(mode=='reply')+'">Reply to owner</button><button class="nt" data-m="note" aria-pressed="'+(mode=='note')+'">Internal note</button><button class="nt" data-m="ask" aria-pressed="'+(mode=='ask')+'">Ask vet</button><button data-m="cancel" aria-pressed="'+(mode=='cancel')+'">Cancel appointment</button><span class="legend">'+({reply:'You’ll send as '+STAFF[me].n+' · '+STAFF[me].r,note:'Only staff and vets can see this.',ask:'Dr. Noe sees this on the Appointments page and answers as a note.',cancel:'The owner gets a cancelled card with your reason.'})[mode]+'</span></div><div class="row"><textarea id="tx" aria-label="Message" placeholder="'+({reply:'Type your message…',note:'Write a note for your team…',ask:'Ask Dr. Noe a question…',cancel:'Reason for cancellation (required)'})[mode]+'"></textarea><button class="send" id="sd" aria-label="Send">➤</button></div><div class="hint">Enter to send, Shift + Enter for a new line.</div></div>';
+ $('thread').innerHTML=h;var m=$('msgs');m.scrollTop=m.scrollHeight}
+function card(m,c){var s=m.s?STAFF[m.s]:null,st={req:['Pending','warn','Request'],ok:['Approved','ok','Approved'],x:['Cancelled','bad','Cancelled']}[m.a];
+ return '<div class="m '+(s?'c':'o')+'"><div class="who">'+(s?esc(s.n)+' · '+s.r:esc(c.o))+'</div><div class="ac"><div class="ah"><span>📅</span><b>Appointment '+st[2]+'</b><span class="pill '+st[1]+'">'+st[0]+'</span></div><div class="al">Pet</div><div class="av2">'+esc(m.pet)+'</div><div class="al">'+(m.a=='req'?'Requested date and time':'Date and time')+'</div><div class="av2">'+esc(m.d)+'</div>'+(m.a=='x'?'<div class="why"><div class="al" style="margin:0">Reason for cancellation</div>'+esc(m.why)+'</div>':'')+'<small>'+m.w+'</small></div></div>'}
+function qc(x){var c=C[x.ci],i=Q.indexOf(x);return '<div class="qc"><div class="r1"><b>'+esc(c.o)+' · Pet: '+esc(c.pet)+'</b><small>from '+STAFF[x.by].n+'</small></div><div>'+esc(x.t)+'</div>'+(x.ans?'<div class="ans">Your answer: '+esc(x.ans)+'</div>':'<div class="row" style="margin-top:10px"><textarea id="qa'+i+'" placeholder="Type your answer…" aria-label="Answer"></textarea><button class="btn p" data-qa="'+i+'">Send answer</button></div>')+'</div>'}
+function vetView(){var o=Q.filter(function(x){return !x.ans}),d=Q.filter(function(x){return x.ans});
+ $('vet').innerHTML='<b style="font-size:16px">Questions from staff</b><p class="legend">Staff ask you here. Your answer goes back to them as an internal note and they relay it to the pet owner. Vets don’t have the Consultations tab.</p>'+(o.length?o.map(qc).join(''):'<div class="empty">No open questions. You’re all caught up.</div>')+(d.length?'<div class="grp">Answered</div>'+d.map(qc).join(''):'')}
+function render(){var v=STAFF[me].r=='Veterinarian';document.querySelector('.wrap').style.display=v?'none':'';$('vet').style.display=v?'block':'none';document.querySelector('h1').textContent=v?'Appointments':'Consultations';if(v)return vetView();tabs();items();thread()}
+function send(){var t=$('tx').value.trim();if(!t)return;var c=C[sel];
+ if(mode=='cancel'){var d='';c.msgs.forEach(function(m){if(m.k=='a')d=m.d});c.msgs.push({k:'a',s:me,a:'x',pet:c.pet,d:d,why:t,w:'Now'})}else if(mode=='ask'){c.msgs.push({k:'n',s:me,t:'@Dr. Noe: '+t,w:'Now'});Q.push({ci:sel,by:me,t:t,ans:null})}else c.msgs.push({k:mode=='note'?'n':'c',s:me,t:t,w:'Now'});
+ if(!c.h&&mode=='reply'&&STAFF[me].r=='Staff')c.h=me;c.unread=0;render();$('tx').focus()}
+document.addEventListener('click',function(e){var t=e.target,b;
+ if(b=t.closest('[data-i]')){sel=+b.dataset.i;C[sel].unread=0;mode='reply';document.body.classList.add('open');return render()}
+ if(b=t.closest('[data-f]')){filter=b.dataset.f;return render()}
+ if(b=t.closest('[data-m]')){mode=b.dataset.m;return thread()}
+ if(b=t.closest('[data-qa]')){var qi=+b.dataset.qa,qv=$('qa'+qi).value.trim();if(!qv)return;Q[qi].ans=qv;C[Q[qi].ci].msgs.push({k:'n',s:'v1',t:qv,w:'Now'});C[Q[qi].ci].unread=1;return render()}
+ if(t.id=='sd')return send();
+ if(b=t.closest('[data-a]')){var c=C[sel],a=b.dataset.a;
+  if(a=='back'){document.body.classList.remove('open');return}
+  if(a=='take')c.h=me;if(a=='un')c.h=null;if(a=='res')c.st='resolved';if(a=='open')c.st='open';
+  
+  render()}});
+document.addEventListener('keydown',function(e){if(e.target.id=='tx'&&e.key=='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+$('q').addEventListener('input',function(e){q=e.target.value;items()});
+$('me').addEventListener('change',function(e){me=e.target.value;mode='reply';render()});
+render();
+</script></body></html>

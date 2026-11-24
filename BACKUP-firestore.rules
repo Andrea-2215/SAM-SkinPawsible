@@ -1,0 +1,696 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isActiveAccount() {
+      return signedIn()
+        ? (exists(/databases/$(database)/documents/users/$(request.auth.uid))
+          ? (!('status' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data) ||
+            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status in ['active', 'Active'])
+          : false)
+        : false;
+    }
+
+    function isSuperadmin() {
+      return isActiveAccount()
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'superadmin'
+        : false;
+    }
+
+    function isClinicStaff() {
+      return isActiveAccount()
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'staff', 'vet', 'veterinarian']
+        : false;
+    }
+
+    function isActiveUserAdmin() {
+      return isActiveAccount()
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+        : false;
+    }
+
+    function isActiveMessagingStaff() {
+      return isActiveAccount()
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'staff']
+        : false;
+    }
+
+    function isActiveVet() {
+      return isActiveAccount()
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['vet', 'veterinarian']
+        : false;
+    }
+
+    function requiresRecentLogin() {
+      return !exists(/databases/$(database)/documents/system_settings/security) ||
+        !('requireRecentLogin' in
+          get(/databases/$(database)/documents/system_settings/security).data) ||
+        get(/databases/$(database)/documents/system_settings/security).data.requireRecentLogin != false;
+    }
+
+    function hasRecentAuthentication() {
+      return signedIn() &&
+        'auth_time' in request.auth.token &&
+        request.auth.token.auth_time * 1000 >=
+          request.time.toMillis() - 300000;
+    }
+
+    function hasRecentAuthenticationForAccessChange() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return !changed.hasAny(['role', 'status']) ||
+        !requiresRecentLogin() ||
+        hasRecentAuthentication();
+    }
+
+    function isVetAccount() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['vet', 'veterinarian'];
+    }
+
+    function isOwnVetEscalationNotification(notificationData) {
+      return isActiveVet() &&
+        notificationData is map &&
+        notificationData.userId == request.auth.uid &&
+        notificationData.type == 'VET_CHAT_ESCALATION';
+    }
+
+    function isOwnSecurityNotification(notificationData) {
+      return isActiveAccount() &&
+        notificationData is map &&
+        notificationData.userId == request.auth.uid &&
+        notificationData.type == 'WEB_USER_ACCESS_CHANGED';
+    }
+
+    function chatStatus(roomData) {
+      return 'chat_status' in roomData ? roomData.chat_status : 'STANDARD';
+    }
+
+    function sameEscalatedVet(oldRoom, newRoom) {
+      return (!('escalatedVetId' in oldRoom) &&
+          !('escalatedVetId' in newRoom) &&
+          !('escalatedVetName' in oldRoom) &&
+          !('escalatedVetName' in newRoom)) ||
+        (('escalatedVetId' in oldRoom) &&
+          ('escalatedVetId' in newRoom) &&
+          oldRoom.escalatedVetId == newRoom.escalatedVetId &&
+          oldRoom.escalatedVetName == newRoom.escalatedVetName);
+    }
+
+    function isActiveVetUser(userId) {
+      let userPath = /databases/$(database)/documents/users/$(userId);
+      return userId is string &&
+        userId.size() > 0 &&
+        exists(userPath) &&
+        get(userPath).data.role in ['vet', 'veterinarian'] &&
+        (!('status' in get(userPath).data) ||
+          get(userPath).data.status in ['active', 'Active']);
+    }
+
+    function canVetReadChat(roomData) {
+      return isActiveVet() &&
+        roomData is map &&
+        (chatStatus(roomData) == 'STANDARD' ||
+          (chatStatus(roomData) in ['ESCALATED', 'RESOLVED'] &&
+            roomData.escalatedVetId == request.auth.uid));
+    }
+
+    function canVetWriteChat(roomData) {
+      return isActiveVet() &&
+        roomData is map &&
+        chatStatus(roomData) == 'ESCALATED' &&
+        roomData.escalatedVetId == request.auth.uid;
+    }
+
+    function isPetOwner() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in [
+          'owner',
+          'user',
+          'pet owner',
+          'petOwner',
+          'petowner',
+          'pet_owner'
+        ];
+    }
+
+    function ownsPetData(petData) {
+      return signedIn() &&
+        petData is map &&
+        'ownerId' in petData &&
+        petData.ownerId == request.auth.uid;
+    }
+
+    function isValidSelfRegistration(userId) {
+      return signedIn() &&
+        request.auth.uid == userId &&
+        request.resource.data.keys().hasAll([
+          'fullName',
+          'email',
+          'contactNumber',
+          'role',
+          'status',
+          'createdAt'
+        ]) &&
+        request.resource.data.keys().hasOnly([
+          'fullName',
+          'email',
+          'contactNumber',
+          'role',
+          'status',
+          'createdAt'
+        ]) &&
+        request.resource.data.fullName is string &&
+        request.resource.data.fullName.size() > 0 &&
+        request.resource.data.fullName.size() <= 120 &&
+        request.resource.data.email == request.auth.token.email &&
+        request.resource.data.contactNumber is string &&
+        request.resource.data.contactNumber.matches('^\\+63[0-9]{10}$') &&
+        request.resource.data.role == 'pending' &&
+        request.resource.data.status == 'Pending' &&
+        request.resource.data.createdAt is timestamp;
+    }
+
+    function isSafeSelfProfileUpdate(userId) {
+      return exists(/databases/$(database)/documents/users/$(userId))
+        ? isSafeSelfProfileUpdateFields(userId)
+        : false;
+    }
+
+    function isSafeSelfProfileUpdateFields(userId) {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return signedIn() &&
+        request.auth.uid == userId &&
+        changed.hasOnly([
+          'firstName',
+          'lastName',
+          'fullName',
+          'email',
+          'phone',
+          'contactNumber',
+          'profileImageUrl',
+          'smsAlertsEnabled',
+          'updatedAt'
+        ]) &&
+        (!changed.hasAny(['firstName']) ||
+          (request.resource.data.firstName is string &&
+            request.resource.data.firstName.size() <= 60)) &&
+        (!changed.hasAny(['lastName']) ||
+          (request.resource.data.lastName is string &&
+            request.resource.data.lastName.size() <= 60)) &&
+        (!changed.hasAny(['fullName']) ||
+          (request.resource.data.fullName is string &&
+            request.resource.data.fullName.size() > 0 &&
+            request.resource.data.fullName.size() <= 120)) &&
+        (!changed.hasAny(['email']) ||
+          request.resource.data.email == request.auth.token.email) &&
+        (!changed.hasAny(['phone']) ||
+          (request.resource.data.phone is string &&
+            request.resource.data.phone.size() <= 20)) &&
+        (!changed.hasAny(['contactNumber']) ||
+          (request.resource.data.contactNumber is string &&
+            request.resource.data.contactNumber.size() <= 20)) &&
+        (!changed.hasAny(['profileImageUrl']) ||
+          request.resource.data.profileImageUrl is string) &&
+        (!changed.hasAny(['smsAlertsEnabled']) ||
+          request.resource.data.smsAlertsEnabled is bool) &&
+        (!changed.hasAny(['updatedAt']) ||
+          request.resource.data.updatedAt == request.time);
+    }
+
+    function isAdminManagedUserUpdate(userId) {
+      return exists(/databases/$(database)/documents/users/$(userId))
+        ? isAdminManagedUserUpdateFields(userId)
+        : false;
+    }
+
+    function isAdminManagedUserUpdateFields(userId) {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return isActiveUserAdmin() &&
+        (!changed.hasAny(['role', 'status']) ||
+          !requiresRecentLogin() ||
+          hasRecentAuthentication()) &&
+        request.auth.uid != userId &&
+        resource.data.role != 'superadmin' &&
+        changed.hasOnly([
+          'fullName',
+          'contactNumber',
+          'role',
+          'status',
+          'updatedAt'
+        ]) &&
+        (!changed.hasAny(['fullName']) ||
+          (request.resource.data.fullName is string &&
+            request.resource.data.fullName.size() > 0 &&
+            request.resource.data.fullName.size() <= 120)) &&
+        (!changed.hasAny(['contactNumber']) ||
+          (request.resource.data.contactNumber is string &&
+            request.resource.data.contactNumber.size() <= 20)) &&
+        (!changed.hasAny(['role']) ||
+          request.resource.data.role in [
+            'admin',
+            'staff',
+            'vet',
+            'veterinarian',
+            'petOwner',
+            'pending'
+          ]) &&
+        (!changed.hasAny(['status']) ||
+          request.resource.data.status in ['Active', 'Pending', 'Inactive']) &&
+        (!changed.hasAny(['updatedAt']) ||
+          request.resource.data.updatedAt == request.time);
+    }
+
+    function isAllowedStaffRoomUpdate() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return isActiveMessagingStaff() &&
+        changed.hasOnly([
+          'lastMessage',
+          'lastMessageAt',
+          'lastMessageInternal',
+          'lastUpdatedAt',
+          'updatedAt',
+          'unread',
+          'unreadCount',
+          'handlerId',
+          'handlerName',
+          'handlerRole',
+          'status',
+          'needsStaffAttention',
+          'resolvedAt',
+          'resolvedBy',
+          'reopenedAt',
+          'reopenedBy'
+        ]) &&
+        (!changed.hasAny(['handlerId', 'handlerName', 'handlerRole']) ||
+          ('handlerId' in request.resource.data &&
+            'handlerName' in request.resource.data &&
+            'handlerRole' in request.resource.data &&
+            request.resource.data.handlerId == null &&
+            request.resource.data.handlerName == null &&
+            request.resource.data.handlerRole == null) ||
+          ('handlerId' in request.resource.data &&
+            'handlerName' in request.resource.data &&
+            'handlerRole' in request.resource.data &&
+            request.resource.data.handlerId == request.auth.uid &&
+            request.resource.data.handlerName is string &&
+            request.resource.data.handlerName.size() <= 120 &&
+            request.resource.data.handlerRole in ['admin', 'staff'])) &&
+        (!changed.hasAny(['status']) ||
+          request.resource.data.status in ['open', 'resolved']) &&
+        (!changed.hasAny(['needsStaffAttention']) ||
+          (request.resource.data.needsStaffAttention == false &&
+            changed.hasAny(['status']) &&
+            request.resource.data.status == 'open')) &&
+        (!changed.hasAny(['resolvedAt']) ||
+          request.resource.data.resolvedAt == request.time) &&
+        (!changed.hasAny(['resolvedBy']) ||
+          request.resource.data.resolvedBy == request.auth.uid) &&
+        (!changed.hasAny(['reopenedAt']) ||
+          request.resource.data.reopenedAt == request.time) &&
+        (!changed.hasAny(['reopenedBy']) ||
+          request.resource.data.reopenedBy == request.auth.uid);
+    }
+
+    function isAllowedStaffChatStateUpdate() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      let oldStatus = chatStatus(resource.data);
+      return isActiveMessagingStaff() &&
+        changed.hasAny(['chat_status']) &&
+        changed.hasOnly([
+          'chat_status',
+          'escalatedVetId',
+          'escalatedVetName',
+          'chatStatusUpdatedAt',
+          'chatStatusUpdatedBy',
+          'lastMessage',
+          'lastMessageAt',
+          'lastMessageInternal'
+        ]) &&
+        ('chat_status' in request.resource.data) &&
+        request.resource.data.chat_status in ['STANDARD', 'ESCALATED', 'RESOLVED'] &&
+        request.resource.data.chatStatusUpdatedAt == request.time &&
+        request.resource.data.chatStatusUpdatedBy == request.auth.uid &&
+        ((request.resource.data.chat_status == 'ESCALATED' &&
+            oldStatus in ['STANDARD', 'RESOLVED'] &&
+            isActiveVetUser(request.resource.data.escalatedVetId) &&
+            request.resource.data.escalatedVetName is string &&
+            request.resource.data.escalatedVetName.size() > 0 &&
+            request.resource.data.escalatedVetName.size() <= 120) ||
+          (request.resource.data.chat_status in ['STANDARD', 'RESOLVED'] &&
+            oldStatus == 'ESCALATED' &&
+            sameEscalatedVet(resource.data, request.resource.data)) ||
+          (request.resource.data.chat_status == 'STANDARD' &&
+            oldStatus == 'RESOLVED' &&
+            sameEscalatedVet(resource.data, request.resource.data)) ||
+          (request.resource.data.chat_status == 'STANDARD' &&
+            oldStatus == 'STANDARD' &&
+            sameEscalatedVet(resource.data, request.resource.data)));
+    }
+
+    function isAllowedVetRoomUpdate() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      let changesStatus = changed.hasAny(['chat_status']);
+      return canVetWriteChat(resource.data) &&
+        changed.hasOnly([
+          'lastMessage',
+          'lastMessageAt',
+          'lastMessageInternal',
+          'lastUpdatedAt',
+          'updatedAt',
+          'unread',
+          'unreadCount',
+          'chat_status',
+          'chatStatusUpdatedAt',
+          'chatStatusUpdatedBy'
+        ]) &&
+        (!changesStatus ||
+          (request.resource.data.chat_status in ['STANDARD', 'RESOLVED'] &&
+            request.resource.data.chatStatusUpdatedAt == request.time &&
+            request.resource.data.chatStatusUpdatedBy == request.auth.uid)) &&
+        (!changed.hasAny(['chatStatusUpdatedAt', 'chatStatusUpdatedBy']) ||
+          changesStatus);
+    }
+
+    function isAllowedStaffMessageUpdate() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return isActiveMessagingStaff() &&
+        changed.hasOnly([
+          'read',
+          'readAt',
+          'isRead',
+          'appointmentDeleted',
+          'appointmentDeletedAt'
+        ]) &&
+        (!changed.hasAny(['appointmentDeleted', 'appointmentDeletedAt']) ||
+          (changed.hasAll(['appointmentDeleted', 'appointmentDeletedAt']) &&
+            request.resource.data.appointmentDeleted == true &&
+            request.resource.data.appointmentDeletedAt == request.time));
+    }
+
+    function isChatParticipantData(roomData) {
+      return ((!isActiveVet() && isActiveAccount()) || isPetOwner()) &&
+        roomData is map &&
+        'participants' in roomData &&
+        roomData.participants is list &&
+        roomData.participants.hasAny([request.auth.uid]);
+    }
+
+    function isChatOwnerOfRoomData(roomData) {
+      return isPetOwner() &&
+        roomData is map &&
+        (('petOwnerId' in roomData && roomData.petOwnerId == request.auth.uid) ||
+          ('owner_id' in roomData && roomData.owner_id == request.auth.uid));
+    }
+
+    function isOwnerFlaggingResolvedChatForStaff() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return isChatOwnerOfRoomData(resource.data) &&
+        resource.data.status == 'resolved' &&
+        changed.hasAny(['needsStaffAttention']) &&
+        changed.hasOnly([
+          'needsStaffAttention',
+          'lastMessage',
+          'lastMessageAt',
+          'lastMessageInternal',
+          'lastUpdatedAt',
+          'updatedAt',
+          'unread',
+          'unreadCount'
+        ]) &&
+        request.resource.data.needsStaffAttention == true;
+    }
+
+    function isConsultationOwnedByUser(consultationData) {
+      return isPetOwner() &&
+        consultationData is map &&
+        (('userId' in consultationData && consultationData.userId == request.auth.uid) ||
+          ('ownerId' in consultationData && consultationData.ownerId == request.auth.uid) ||
+          ('petOwnerId' in consultationData && consultationData.petOwnerId == request.auth.uid)) &&
+        (!('userId' in consultationData) || consultationData.userId == request.auth.uid) &&
+        (!('ownerId' in consultationData) || consultationData.ownerId == request.auth.uid) &&
+        (!('petOwnerId' in consultationData) || consultationData.petOwnerId == request.auth.uid);
+    }
+
+    function isChatParticipant(roomId) {
+      let roomPath = /databases/$(database)/documents/chatRooms/$(roomId);
+      return signedIn() &&
+        exists(roomPath) &&
+        (isChatParticipantData(get(roomPath).data) ||
+          isChatOwnerOfRoomData(get(roomPath).data));
+    }
+
+    function isChatParticipantAfter(roomId) {
+      let roomPath = /databases/$(database)/documents/chatRooms/$(roomId);
+      return signedIn() &&
+        existsAfter(roomPath) &&
+        isChatParticipantData(getAfter(roomPath).data);
+    }
+
+    // ==========================================================
+    // RECURSIVE & SUBCOLLECTION RULES (Covers nested items & collectionGroup)
+    // ==========================================================
+    match /{path=**}/consultations/{consultationId} {
+      allow read, write: if isClinicStaff() || isSuperadmin();
+    }
+
+    match /{path=**}/pets/{petId} {
+      allow read, write: if isClinicStaff() || isSuperadmin();
+    }
+
+    match /{path=**}/scans/{scanId} {
+      allow read: if isClinicStaff() || isSuperadmin();
+    }
+
+    match /pets/{petId} {
+      allow read: if ownsPetData(resource.data);
+      allow create: if ownsPetData(request.resource.data);
+      allow update: if ownsPetData(resource.data) &&
+        ownsPetData(request.resource.data);
+      allow delete: if ownsPetData(resource.data);
+
+      match /pastRecords/{recordId} {
+        allow read: if ownsPetData(
+          get(/databases/$(database)/documents/pets/$(petId)).data
+        );
+      }
+
+      match /medicalRecords/{recordId} {
+        allow read: if ownsPetData(
+          get(/databases/$(database)/documents/pets/$(petId)).data
+        );
+      }
+    }
+
+    // ==========================================================
+    // USER PROFILES
+    // ==========================================================
+    match /users/{userId} {
+      allow read: if signedIn() && (request.auth.uid == userId || isClinicStaff() || isSuperadmin());
+      allow create: if isSuperadmin() || isValidSelfRegistration(userId);
+      allow update: if (isSuperadmin() &&
+          hasRecentAuthenticationForAccessChange()) ||
+        isAdminManagedUserUpdate(userId) ||
+        isSafeSelfProfileUpdate(userId);
+      allow delete: if isSuperadmin();
+
+      match /pets/{petId} {
+        allow read, create, update, delete: if signedIn() &&
+          request.auth.uid == userId;
+
+        match /medicalHistory/{recordId} {
+          allow read: if signedIn() &&
+            request.auth.uid == userId;
+        }
+      }
+
+      match /scans/{scanId} {
+        allow read, create, update, delete: if signedIn() &&
+          request.auth.uid == userId;
+      }
+    }
+
+    // ==========================================================
+    // WEB USER SECURITY SETTINGS
+    // ==========================================================
+    match /system_settings/security {
+      allow read: if isActiveUserAdmin() || isSuperadmin();
+      allow create, update: if isSuperadmin() &&
+        hasRecentAuthentication() &&
+        request.resource.data.keys().hasAll([
+          'requireRecentLogin',
+          'roleNotifications',
+          'adminPasswordResets',
+          'updatedAt'
+        ]) &&
+        request.resource.data.keys().hasOnly([
+          'requireRecentLogin',
+          'roleNotifications',
+          'adminPasswordResets',
+          'updatedAt'
+        ]) &&
+        request.resource.data.requireRecentLogin is bool &&
+        request.resource.data.roleNotifications is bool &&
+        request.resource.data.adminPasswordResets is bool &&
+        request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    // ==========================================================
+    // ROLE PERMISSIONS
+    // ==========================================================
+    match /roles/{roleId} {
+      allow read: if signedIn();
+      allow create, update: if isSuperadmin() &&
+        (!requiresRecentLogin() || hasRecentAuthentication());
+      allow delete: if false;
+    }
+
+    // ==========================================================
+    // TOP-LEVEL CLINIC OPERATIONS
+    // ==========================================================
+    match /appointments/{appId} {
+      allow read, write: if isClinicStaff() || isSuperadmin();
+    }
+
+    match /reminders/{reminderId} {
+      allow read, create, update, delete: if isClinicStaff() || isSuperadmin() ||
+        (signedIn() && (
+          (resource != null && resource.data.userId == request.auth.uid) ||
+          (resource == null && request.resource.data.userId == request.auth.uid)
+        ));
+    }
+
+    match /notifications/{notifId} {
+      allow read: if signedIn() &&
+        (!isVetAccount() ||
+          isOwnVetEscalationNotification(resource.data) ||
+          isOwnSecurityNotification(resource.data));
+      allow create: if signedIn();
+      allow update: if signedIn() &&
+        (!isVetAccount() ||
+          ((isOwnVetEscalationNotification(resource.data) ||
+            isOwnSecurityNotification(resource.data)) &&
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['isRead']) &&
+            request.resource.data.isRead == true));
+      allow delete: if signedIn() &&
+        (!isVetAccount() ||
+          isOwnVetEscalationNotification(resource.data) ||
+          isOwnSecurityNotification(resource.data));
+    }
+
+    match /consultations/{consultationId} {
+      allow read: if isClinicStaff() || isSuperadmin() ||
+        isConsultationOwnedByUser(resource.data);
+      allow create: if isClinicStaff() || isSuperadmin() ||
+        (isConsultationOwnedByUser(request.resource.data) &&
+          (!('status' in request.resource.data) ||
+            request.resource.data.status in ['pending', 'Pending']) &&
+          (!('statusLower' in request.resource.data) ||
+            request.resource.data.statusLower == 'pending'));
+      allow update, delete: if isClinicStaff() || isSuperadmin();
+    }
+
+    // ==========================================================
+    // STAFF CONSULTATIONS AND CHAT
+    // ==========================================================
+    match /chatRooms/{roomId} {
+      allow read: if isActiveMessagingStaff() ||
+        canVetReadChat(resource.data) ||
+        isChatParticipantData(resource.data) ||
+        isChatOwnerOfRoomData(resource.data);
+      allow create: if (isActiveMessagingStaff() || isPetOwner()) &&
+        'participants' in request.resource.data &&
+        request.resource.data.participants is list &&
+        request.auth.uid in request.resource.data.participants;
+      allow update: if isAllowedStaffRoomUpdate() ||
+        isAllowedStaffChatStateUpdate() ||
+        isAllowedVetRoomUpdate() ||
+        isOwnerFlaggingResolvedChatForStaff() ||
+        (isChatParticipantData(resource.data) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'lastMessage',
+            'lastMessageAt',
+            'lastMessageInternal',
+            'lastUpdatedAt',
+            'updatedAt',
+            'unread',
+            'unreadCount'
+          ]));
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if isActiveMessagingStaff() ||
+          canVetReadChat(get(/databases/$(database)/documents/chatRooms/$(roomId)).data) ||
+          isChatParticipant(roomId);
+        allow create: if signedIn() &&
+          request.resource.data.senderId == request.auth.uid &&
+          (isActiveMessagingStaff() ||
+            isChatParticipant(roomId) ||
+            isChatParticipantAfter(roomId) ||
+            canVetWriteChat(get(/databases/$(database)/documents/chatRooms/$(roomId)).data));
+        allow update: if isAllowedStaffMessageUpdate() ||
+          (canVetWriteChat(get(/databases/$(database)/documents/chatRooms/$(roomId)).data) &&
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['read', 'readAt', 'isRead'])) ||
+          (isChatParticipant(roomId) &&
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['read', 'readAt', 'isRead']));
+        allow delete: if isActiveMessagingStaff();
+      }
+
+      match /presence/{userId} {
+        allow read: if isActiveMessagingStaff() ||
+          canVetReadChat(get(/databases/$(database)/documents/chatRooms/$(roomId)).data) ||
+          isChatParticipant(roomId);
+        allow create, update: if isActiveMessagingStaff() &&
+          userId == request.auth.uid &&
+          request.resource.data.userId == request.auth.uid;
+        allow delete: if false;
+      }
+
+      match /assignmentHistory/{entryId} {
+        allow read: if isActiveMessagingStaff();
+        allow create: if isActiveMessagingStaff() &&
+          request.resource.data.actorId == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
+
+    // SMS composition is available to active admins and staff.
+    match /smsAwareness/{campaignId} {
+      allow read, create, update: if isActiveMessagingStaff();
+      allow delete: if false;
+    }
+
+    match /medical_history/{docId} {
+      allow read, write: if isClinicStaff() || isSuperadmin();
+    }
+
+    match /sms_logs/{logId} {
+      allow read, create: if isClinicStaff() || isSuperadmin();
+      allow update, delete: if false;
+    }
+
+    match /smsLogs/{logId} {
+      allow read, create: if isClinicStaff() || isSuperadmin();
+      allow update, delete: if false;
+    }
+
+    // ==========================================================
+    // SYSTEM SETTINGS & AUDIT LOGS
+    // ==========================================================
+    match /audit_logs/{logId} {
+      allow read: if isSuperadmin();
+      allow create: if signedIn();
+      allow update, delete: if false;
+    }
+  }
+}

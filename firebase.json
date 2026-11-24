@@ -1,0 +1,100 @@
+
+{
+  "hosting": {
+    "public": ".",
+    "rewrites": [
+      {
+        "source": "/",
+        "destination": "/pages/login.html"
+      },
+      {
+        "source": "/index.html",
+        "destination": "/pages/login.html"
+      },
+      {
+        "source": "/login.html",
+        "destination": "/pages/login.html"
+      },
+      {
+        "source": "/register.html",
+        "destination": "/pages/register.html"
+      },
+      {
+        "source": "/dashboard.html",
+        "destination": "/pages/dashboard.html"
+      },
+      {
+        "source": "/pet-records.html",
+        "destination": "/pages/pet-records.html"
+      },
+      {
+        "source": "/pet-owners.html",
+        "destination": "/pages/pet-owners.html"
+      },
+      {
+        "source": "/scan-records.html",
+        "destination": "/pages/scan-records.html"
+      },
+      {
+        "source": "/appointments.html",
+        "destination": "/pages/appointments.html"
+      },
+      {
+        "source": "/consultations.html",
+        "destination": "/pages/consultations.html"
+      },
+      {
+        "source": "/sms-logs.html",
+        "destination": "/pages/sms-logs.html"
+      },
+      {
+        "source": "/users.html",
+        "destination": "/pages/users.html"
+      },
+      {
+        "source": "/roles-permissions.html",
+        "destination": "/pages/roles-permissions.html"
+      },
+      {
+        "source": "/audit-logs.html",
+        "destination": "/pages/audit-logs.html"
+      },
+      {
+        "source": "/security-settings.html",
+        "destination": "/pages/security-settings.html"
+      },
+      {
+        "source": "/settings.html",
+        "destination": "/pages/settings.html"
+      }
+    ],
+    "ignore": [
+      "firebase.json",
+      "BACKUP-firestore.rules",
+      "current-firestore.rules",
+      "storage.rules",
+      "firestore.indexes.json",
+      "firestore-debug.log",
+      "*.zip",
+      "README.md",
+      "FEATURE_SPEC.md",
+      "consultations (1).html",
+      "login-example.html",
+      ".agents/**",
+      ".github/**",
+      "functions/**",
+      "tests/**",
+      "node_modules/**",
+      "firestore.rules",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  },
+  "firestore": {
+    "rules": "current-firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}

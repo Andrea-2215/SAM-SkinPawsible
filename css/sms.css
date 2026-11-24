@@ -1,0 +1,460 @@
+/* =====================================================================
+   sms.css  ·  styles for the SMS page only
+   Load it AFTER style.css and app-shell.css.
+   Every class starts with "sms-" so it never touches the sidebar or other pages.
+   Colors come from your style.css (--primary, --primary-light, --accent ...).
+   ===================================================================== */
+
+.sms-page {
+  --sms-pink: #fdeef5;
+  --sms-mint: #e4f7ec;
+  --sms-peach: #fff1e4;
+  --sms-ok: #16a34a;
+  --sms-warn: #b45309;
+  --sms-warn-bg: #fef3c7;
+  --sms-line: #eee8f5;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+
+.main-content:has(.sms-page) {
+  width: auto;
+}
+
+.sms-page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.sms-page-header .sms-search {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sms-page-header .sms-search input {
+  width: 100%;
+}
+
+/* ---------- hero ---------- */
+.sms-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 26px;
+  margin-bottom: 20px;
+  border-radius: 20px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 92% 18%, rgba(255, 255, 255, .22) 0, transparent 38%),
+    linear-gradient(120deg, var(--primary-dark) 0%, var(--primary) 55%, var(--accent) 140%);
+}
+
+.sms-hero h2 { margin: 0 0 4px; font-size: 1.15rem; font-weight: 600; }
+.sms-hero p { margin: 0; font-size: .85rem; opacity: .85; }
+
+.sms-stats { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.sms-stat {
+  min-width: 104px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .16);
+  backdrop-filter: blur(4px);
+}
+
+.sms-stat strong { display: block; font-size: 1.25rem; font-weight: 600; line-height: 1.2; }
+.sms-stat span { font-size: .72rem; opacity: .85; }
+
+/* ---------- tabs (not .nav-link, so the sidebar styles don't leak in) ---------- */
+.sms-tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 5px;
+  margin-bottom: 20px;
+  background: #fff;
+  border: 1px solid var(--sms-line);
+  border-radius: 999px;
+}
+
+.sms-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: .85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+
+.sms-tab:hover { color: var(--primary); }
+.sms-tab.active { background: var(--primary); color: #fff; }
+.sms-tab:focus-visible,
+.sms-chip:focus-visible,
+.sms-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* ---------- layout ---------- */
+.sms-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 991px) { .sms-grid { grid-template-columns: 1fr; } }
+
+.sms-card {
+  background: #fff;
+  border: 1px solid var(--sms-line);
+  border-radius: 20px;
+  box-shadow: 0 6px 22px rgba(91, 46, 143, .06);
+  overflow: hidden;
+}
+
+.sms-card-head { padding: 18px 22px 14px; border-bottom: 1px solid var(--sms-line); }
+.sms-card-head h5 { margin: 0 0 2px; font-size: 1rem; font-weight: 600; color: var(--text-dark); }
+.sms-card-head p { margin: 0; font-size: .8rem; color: var(--text-muted); }
+
+/* ---------- search + chips ---------- */
+.sms-toolbar { display: flex; flex-wrap: wrap; gap: 10px; padding: 14px 22px; border-bottom: 1px solid var(--sms-line); }
+
+.sms-search { position: relative; flex: 1 1 100%; }
+.sms-search i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--accent); }
+.sms-search input { padding-left: 38px; border-radius: 999px; background: var(--content-bg); }
+
+.sms-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.sms-chip {
+  padding: 5px 13px;
+  border: 1px solid var(--sms-line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--text-dark);
+  font-size: .8rem;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+
+.sms-chip:hover { background: var(--primary-light); border-color: var(--accent); }
+.sms-chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+/* ---------- recipient list ---------- */
+.sms-list { max-height: 440px; overflow-y: auto; }
+
+.sms-list-head,
+.sms-row {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 60px 112px;
+  gap: 12px;
+  align-items: center;
+  margin: 0;
+  padding: 10px 22px;
+}
+
+.sms-list-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #faf7fd;
+  border-bottom: 1px solid var(--sms-line);
+  color: var(--text-muted);
+  font-size: .72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sms-row { border-bottom: 1px solid #f4f0f9; border-left: 3px solid transparent; cursor: pointer; transition: background .12s; }
+.sms-row:hover { background: #faf7fd; }
+.sms-row.selected { background: var(--primary-light); border-left-color: var(--primary); }
+.sms-row.disabled { opacity: .5; cursor: not-allowed; }
+.sms-row.disabled:hover { background: transparent; }
+
+.sms-person { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+.sms-avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: .8rem;
+  font-weight: 600;
+}
+
+.sms-avatar.av-0 { background: var(--primary-light); color: var(--primary); }
+.sms-avatar.av-1 { background: var(--sms-pink); color: #be185d; }
+.sms-avatar.av-2 { background: var(--sms-mint); color: #15803d; }
+.sms-avatar.av-3 { background: var(--sms-peach); color: #c2410c; }
+
+.sms-name { font-size: .88rem; font-weight: 500; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sms-number { font-size: .75rem; color: var(--text-muted); }
+
+.sms-pill {
+  display: inline-block;
+  padding: 3px 11px;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sms-pill.on,
+.sms-pill.sent { background: var(--sms-mint); color: var(--sms-ok); }
+.sms-pill.off,
+.sms-pill.unset { background: #f1f5f9; color: var(--text-muted); }
+.sms-pill.todo { background: var(--primary-light); color: var(--primary); }
+.sms-pill.missed { background: var(--sms-warn-bg); color: var(--sms-warn); }
+
+.sms-last { font-size: .75rem; color: var(--text-muted); }
+.sms-last.done { color: var(--sms-ok); }
+.sms-empty { padding: 44px 22px; text-align: center; color: var(--text-muted); font-size: .85rem; }
+
+@media (max-width: 575px) {
+  .sms-page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .sms-page-header .topbar-actions { justify-content: flex-end; }
+  .sms-list-head, .sms-row { grid-template-columns: 24px minmax(0, 1fr) 56px; }
+  .sms-list-head span:last-child, .sms-row .sms-last { display: none; }
+}
+
+/* ---------- compose ---------- */
+.sms-compose { position: sticky; top: 16px; }
+@media (max-width: 991px) { .sms-compose { position: static; } }
+
+.sms-body { padding: 18px 22px 22px; }
+.sms-label { display: block; margin-bottom: 6px; font-size: .78rem; font-weight: 500; color: var(--text-dark); }
+
+.sms-to {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  border: 1px dashed var(--accent);
+  border-radius: 14px;
+  background: #faf7fd;
+  font-size: .85rem;
+}
+
+.sms-to.has { border-style: solid; border-color: transparent; background: var(--primary-light); color: var(--primary-dark); font-weight: 500; }
+
+.sms-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  background: var(--sms-pink);
+  color: #9d174d;
+  font-size: .8rem;
+}
+
+.sms-link { padding: 0; border: 0; background: none; color: var(--primary); font-size: .8rem; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.sms-link:hover { text-decoration: underline; }
+
+.sms-templates { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+
+.sms-textarea { border-radius: 14px; background: var(--content-bg); }
+
+.sms-meter { height: 5px; margin-top: 10px; overflow: hidden; border-radius: 999px; background: #efe9f6; }
+.sms-meter > div { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--primary)); transition: width .15s; }
+.sms-meter.over > div { background: #f59e0b; }
+.sms-counts { display: flex; justify-content: space-between; margin-top: 6px; font-size: .74rem; color: var(--text-muted); }
+
+/* phone-style preview (the one memorable thing on this page) */
+.sms-phone {
+  margin: 18px 0;
+  padding: 12px 14px 16px;
+  border: 1px solid var(--sms-line);
+  border-radius: 22px;
+  background: linear-gradient(180deg, #faf7fd, #f3ecfa);
+}
+
+.sms-phone-top { display: flex; align-items: center; gap: 8px; padding-bottom: 10px; margin-bottom: 12px; border-bottom: 1px solid var(--sms-line); font-size: .78rem; font-weight: 600; color: var(--text-dark); }
+
+.sms-phone-top .sms-paw {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: .8rem;
+}
+
+.sms-bubble {
+  max-width: 92%;
+  padding: 10px 14px;
+  border-radius: 18px 18px 18px 4px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(91, 46, 143, .1);
+  font-size: .85rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sms-bubble.placeholder { color: #a79bb8; }
+
+.sms-cost { margin-bottom: 14px; font-size: .8rem; color: var(--text-muted); }
+.sms-send { width: 100%; padding: 12px; border-radius: 999px; font-weight: 600; }
+.sms-send:disabled { opacity: .45; }
+
+/* ---------- monthly awareness ---------- */
+.sms-month {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) 190px auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 22px;
+  border-bottom: 1px solid #f4f0f9;
+}
+
+.sms-month:last-child { border-bottom: 0; }
+.sms-month.now { background: #faf7fd; }
+
+.sms-month-chip {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: .78rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.sms-month-chip small { display: block; font-size: .6rem; font-weight: 500; opacity: .75; }
+.sms-month.now .sms-month-chip { background: var(--primary); color: #fff; }
+
+.sms-month-title { min-width: 0; font-size: .88rem; font-weight: 500; }
+.sms-month-title span { display: block; overflow: hidden; margin-top: 2px; font-size: .75rem; font-weight: 400; color: var(--text-muted); white-space: nowrap; text-overflow: ellipsis; }
+.sms-month-actions { display: flex; justify-content: flex-end; gap: 6px; }
+.sms-month-actions .btn { border-radius: 999px; padding: 6px 14px; }
+
+@media (max-width: 767px) {
+  .sms-month { grid-template-columns: 56px minmax(0, 1fr); }
+  .sms-month > div:nth-child(3),
+  .sms-month-actions { grid-column: 2; justify-content: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sms-meter > div, .sms-row, .sms-tab, .sms-chip { transition: none; }
+}
+/* ---------- seasonal awareness (v5) ----------
+   Paste this at the very bottom of your existing sms.css. Nothing else in sms.css changes. */
+
+.sms-pill.soon { background: #f1f5f9; color: var(--text-muted); }
+
+.sms-season-emoji { display: block; font-size: 1.15rem; line-height: 1.2; }
+
+.sms-now {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: .65rem;
+  font-style: normal;
+  font-weight: 600;
+  vertical-align: middle;
+}
+/* ---------- seasonal awareness (v5) ----------
+   Paste this at the very bottom of your existing sms.css. Nothing else in sms.css changes. */
+
+.sms-pill.soon { background: #f1f5f9; color: var(--text-muted); }
+
+.sms-season-emoji { display: block; font-size: 1.15rem; line-height: 1.2; }
+
+.sms-now {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: .65rem;
+  font-style: normal;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+/* ---------- season + weather card (v6) ---------- */
+.sms-nowcard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  border: 1px solid var(--sms-line);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 6px 22px rgba(91, 46, 143, .06);
+}
+
+.sms-nowcard-main { display: flex; align-items: center; gap: 14px; }
+.sms-nowcard-emoji { font-size: 1.8rem; line-height: 1; }
+.sms-nowcard-main strong { display: block; font-size: .95rem; font-weight: 600; color: var(--text-dark); }
+.sms-nowcard-main span:not(.sms-nowcard-emoji) { font-size: .8rem; color: var(--text-muted); }
+
+.sms-nowcard-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  width: min(460px, 100%);
+  margin-left: auto;
+}
+
+.sms-nowcard-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 8px 8px 14px;
+  border-radius: 999px;
+  background: var(--sms-warn-bg);
+  color: var(--sms-warn);
+  font-size: .8rem;
+  font-weight: 500;
+}
+
+.sms-nowcard-reminder {
+  max-width: 100%;
+  padding: 8px 14px;
+  border-radius: 14px;
+  background: var(--sms-warn-bg);
+  color: var(--sms-warn);
+  font-size: .85rem;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.sms-nowcard-alert .btn { border-radius: 999px; }
+
+@media (max-width: 575px) {
+  .sms-nowcard-side { align-items: stretch; }
+}

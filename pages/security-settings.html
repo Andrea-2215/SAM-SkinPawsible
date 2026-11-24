@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>(function () { var role = localStorage.getItem("userRole"); if (role) document.documentElement.setAttribute("data-role", role); }());</script>
+  <script>
+    const role = localStorage.getItem("userRole");
+    if (role === "superadmin") document.documentElement.classList.add("role-superadmin");
+    if (localStorage.getItem("userName") && localStorage.getItem("userRoleLabel")) document.documentElement.classList.add("header-ready");
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security settings · SkinPawsible</title>
+  <link rel="icon" type="image/jpeg" href="../images/LOGO.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link href="../css/style.css" rel="stylesheet">
+  <link href="../css/app-shell.css?v=9" rel="stylesheet">
+  <link href="../css/header-actions.css?v=2" rel="stylesheet">
+  <link href="../css/security-settings.css?v=1" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <script src="../js/sidebar-ui.js?v=6"></script>
+
+    <main class="main-content">
+      
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">Security settings</h1>
+          
+          <p class="page-sub">System-wide controls for the IT Administrator.</p>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" class="btn btn-outline-secondary" id="logoutBtn">Log out</button>
+        </div>
+      </div>
+      <!--
+      <div class="security-warning" role="status">
+        <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+        
+        <div><strong>These controls apply to web-user administration.</strong><span>Firestore Rules enforce recent sign-in for role/access changes and protect these settings. The password-reset option only controls button visibility in this app; it cannot prevent direct Firebase password-reset requests.</span></div>
+      </div>
+        -->
+      
+
+      <form id="securitySettingsForm">
+        <section class="table-card security-card">
+          <div class="security-card-heading"><h2>Account protection</h2><p>Recommended safeguards for administrative actions.</p></div>
+          <label class="security-setting-row"><span><strong>Require recent sign-in for role or access changes</strong><small>Require password confirmation when the last sign-in was more than five minutes ago before changing user access or role permissions.</small></span><input type="checkbox" class="permission-toggle" data-security-key="requireRecentLogin"></label>
+          <label class="security-setting-row"><span><strong>Notify when roles or access change</strong><small>Send an in-app notice to the affected user and superadmins.</small></span><input type="checkbox" class="permission-toggle" data-security-key="roleNotifications"></label>
+        </section>
+
+        <section class="table-card security-card">
+          <div class="security-card-heading"><h2>User-management options</h2><p>These affect web-user administration only.</p></div>
+          <label class="security-setting-row"><span><strong>Show password-reset action to clinic admins</strong><small>UI convenience only; this does not restrict direct Firebase Auth reset requests.</small></span><input type="checkbox" class="permission-toggle" data-security-key="adminPasswordResets"></label>
+          <!--div class="security-rule-status"><i class="bi bi-shield-check" aria-hidden="true"></i><span>Role/access changes and security-setting writes: <strong>Enforced by Firestore Rules</strong></span></div-->
+        </section>
+
+        <div class="security-actions"><button type="submit" class="btn btn-primary">Save settings</button><span id="securitySaveMessage" role="status" aria-live="polite"></span></div>
+      </form>
+    </main>
+  </div>
+
+  <script type="module" src="../js/header-actions.js?v=6"></script>
+  <script type="module" src="../js/sidebar.js?v=13"></script>
+  <script type="module" src="../js/security-settings.js?v=2"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>(function () { var role = localStorage.getItem("userRole"); if (role) document.documentElement.setAttribute("data-role", role); }());</script>
+  <script>
+    const role = localStorage.getItem("userRole");
+    if (role === "superadmin") document.documentElement.classList.add("role-superadmin");
+    if (localStorage.getItem("userName") && localStorage.getItem("userRoleLabel")) document.documentElement.classList.add("header-ready");
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roles &amp; permissions · SkinPawsible</title>
+  <link rel="icon" type="image/jpeg" href="../images/LOGO.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link href="../css/style.css" rel="stylesheet">
+  <link href="../css/app-shell.css?v=9" rel="stylesheet">
+  <link href="../css/header-actions.css?v=2" rel="stylesheet">
+  <link href="../css/users.css?v=2" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <script src="../js/sidebar-ui.js?v=6"></script>
+
+    <main class="main-content">
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">Roles &amp; permissions</h1>
+          <p class="page-sub">Control which parts of SkinPawsible each role can access.</p>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" class="btn btn-outline-secondary" id="logoutBtn">Log out</button>
+        </div>
+      </div>
+
+      <div class="table-card roles-page-card">
+        <div class="role-cards" id="roleCards">
+          <button type="button" class="role-card is-selected" data-permission-role="admin">
+            <strong>Administrator</strong><span>Runs the clinic day to day</span><small data-role-count="admin">0 users</small>
+          </button>
+          <button type="button" class="role-card" data-permission-role="vet">
+            <strong>Veterinarian</strong><span>Clinical work and patient care</span><small data-role-count="vet">0 users</small>
+          </button>
+          <button type="button" class="role-card" data-permission-role="staff">
+            <strong>Staff</strong><span>Front desk and scheduling</span><small data-role-count="staff">0 users</small>
+          </button>
+          <button type="button" class="role-card role-card-locked" data-permission-role="superadmin">
+            <strong>IT Administrator</strong><span>System maintenance only. Cannot see clinic data.</span><small data-role-count="superadmin">0 users</small>
+          </button>
+        </div>
+
+        <div class="permissions-card mt-4">
+          <div class="permissions-card-header">
+            <div>
+              <h2 id="permissionsTitle">Permissions for Administrator</h2>
+              <p id="permissionsNotice" class="permissions-notice" hidden>🔒 Locked. This role can never open clinic data.</p>
+            </div>
+            <button type="button" class="btn btn-primary" id="savePermissionsBtn">Save changes</button>
+          </div>
+          <div id="permissionsList"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="../js/header-actions.js?v=6"></script>
+  <script type="module" src="../js/sidebar.js?v=13"></script>
+  <script type="module" src="../js/roles-permissions.js?v=3"></script>
+</body>
+</html>

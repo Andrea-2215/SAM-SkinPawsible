@@ -1,0 +1,10 @@
+.audit-card { padding: 22px; }
+.audit-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.audit-toolbar h2 { margin: 0; color: #21143a; font-size: 1.05rem; }
+.audit-toolbar p { margin: 4px 0 0; color: #786888; font-size: .82rem; }
+.audit-table { min-width: 760px; }
+.audit-table thead th { text-transform: none; color: #5b4b7a; font-size: .86rem; letter-spacing: 0; font-weight: 500; }
+.audit-table tbody td { color: #36264d; font-size: .86rem; vertical-align: middle; }
+.audit-action { color: var(--primary); font-weight: 600; }
+.audit-empty { padding: 48px 20px !important; }
+@media (max-width: 576px) { .audit-toolbar { align-items: stretch; flex-direction: column; } }

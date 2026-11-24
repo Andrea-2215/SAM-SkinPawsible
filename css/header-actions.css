@@ -1,0 +1,493 @@
+/* header-actions.css - upper-right group of the topbar */
+
+.topbar-actions { display: flex; align-items: center; }
+
+.ha-root {
+  --ha-accent: #6b3fa0;
+  --ha-accent-soft: #f1eafa;
+  --ha-border: #e4e0ec;
+  --ha-text: #1f1830;
+  --ha-muted: #6f6a7d;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.ha-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 48px;
+  padding: 0 18px;
+  background: #fff;
+  border: 1px solid var(--ha-border);
+  border-radius: 18px;
+  color: var(--ha-accent);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.ha-date:hover,
+.ha-date[aria-expanded="true"] {
+  background: var(--ha-accent-soft);
+  color: var(--ha-accent);
+  border-color: var(--ha-accent);
+}
+
+.ha-icon-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid var(--ha-border);
+  border-radius: 10px;
+  color: var(--ha-muted);
+  font-size: 18px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.ha-icon-btn:hover,
+.ha-icon-btn[aria-expanded="true"] {
+  background: var(--ha-accent-soft);
+  color: var(--ha-accent);
+  border-color: var(--ha-accent);
+}
+
+.ha-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: #d92d3f;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+}
+
+.ha-wrap { position: relative; }
+
+.ha-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 12px 0 8px;
+  background: #fff;
+  border: 1px solid var(--ha-border);
+  border-radius: 23px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color .15s, background .15s;
+}
+.ha-profile:hover,
+.ha-profile[aria-expanded="true"] {
+  border-color: var(--ha-accent);
+  background: var(--ha-accent-soft);
+}
+
+.ha-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--ha-accent);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ha-who { display: flex; flex-direction: column; line-height: 1.2; }
+.ha-who strong { font-size: 13px; font-weight: 600; color: var(--ha-text); }
+.ha-who small { font-size: 11px; color: var(--ha-muted); }
+.ha-caret { font-size: 12px; color: var(--ha-muted); }
+
+/* dropdown panels */
+.ha-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 1050;
+  min-width: 220px;
+  background: #fff;
+  border: 1px solid var(--ha-border);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(31, 24, 48, .15);
+  overflow: hidden;
+}
+.ha-panel[hidden] { display: none; }
+.ha-notif-panel { width: 320px; }
+.ha-calendar-panel {
+  width: 424px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 88px);
+  overflow-y: auto;
+  border-radius: 24px;
+  box-shadow: 0 18px 42px rgba(49, 26, 72, .18);
+}
+
+.ha-panel-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ha-border);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ha-text);
+}
+.ha-notif-panel .ha-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ha-mark-all-read {
+  padding: 4px 0;
+  background: none;
+  border: 0;
+  color: var(--ha-accent);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.ha-mark-all-read:disabled { color: var(--ha-muted); cursor: default; }
+.ha-notif-filters {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ha-border);
+}
+.ha-notif-filter {
+  padding: 5px 9px;
+  background: #fff;
+  border: 1px solid var(--ha-border);
+  border-radius: 999px;
+  color: var(--ha-muted);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.ha-notif-filter:hover,
+.ha-notif-filter.is-active {
+  background: var(--ha-accent-soft);
+  border-color: var(--ha-accent);
+  color: var(--ha-accent);
+}
+.ha-notif-filter:focus-visible {
+  outline: 2px solid var(--ha-accent);
+  outline-offset: 2px;
+}
+.ha-user-info { display: flex; flex-direction: column; line-height: 1.3; }
+.ha-user-info small { font-weight: 400; font-size: 12px; color: var(--ha-muted); }
+
+.ha-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  background: none;
+  border: 0;
+  color: var(--ha-text);
+  font-size: 13px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.ha-menu-item:hover { background: var(--ha-accent-soft); }
+.ha-danger { color: #d92d3f; border-top: 1px solid var(--ha-border); }
+.ha-danger:hover { background: #fdecee; }
+
+/* notifications */
+.ha-notif-list { max-height: 320px; overflow-y: auto; }
+.ha-notif {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--ha-border);
+  color: var(--ha-text);
+}
+.ha-notif.is-read { background: #f3f0f5; }
+.ha-notif.is-read .ha-notif-open:hover,
+.ha-notif.is-read .ha-notif-dismiss:hover { background: #ece7f0; }
+.ha-notif-open {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 8px 12px 16px;
+  background: none;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ha-notif-open:hover,
+.ha-notif-dismiss:hover { background: var(--ha-accent-soft); }
+.ha-notif-open > i { margin-top: 2px; color: var(--ha-accent); font-size: 18px; }
+.ha-notif-content { min-width: 0; display: block; }
+.ha-notif-title { display: block; font-size: 13px; }
+.ha-notif-message {
+  display: block;
+  margin-top: 3px;
+  color: var(--ha-muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ha-notif-time { display: block; margin-top: 2px; font-size: 11px; color: var(--ha-muted); }
+.ha-notif-dismiss {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  margin-right: 8px;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  color: var(--ha-muted);
+  cursor: pointer;
+}
+.ha-notif-dismiss:disabled { opacity: .5; cursor: wait; }
+
+.ha-empty { padding: 28px 16px; text-align: center; color: var(--ha-muted); }
+.ha-empty i {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  background: var(--ha-accent-soft);
+  color: var(--ha-accent);
+  font-size: 20px;
+}
+.ha-empty p { margin: 0; font-size: 13px; }
+
+.ha-calendar-today,
+.ha-calendar-nav {
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.ha-calendar-today {
+  min-height: 42px;
+  padding: 0 18px;
+  background: var(--ha-accent-soft);
+  color: var(--ha-accent);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+.ha-calendar-month {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 102px;
+  padding: 20px 22px;
+  background: linear-gradient(115deg, #542579, #8c65b2);
+  color: #fff;
+}
+.ha-calendar-month-title {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ha-calendar-month-title strong {
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.ha-calendar-month-title > span {
+  color: rgba(255, 255, 255, .78);
+  font-size: 14px;
+}
+.ha-calendar-month-nav {
+  display: flex;
+  gap: 8px;
+}
+.ha-calendar-nav {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, .2);
+  color: #fff;
+  font-size: 14px;
+}
+.ha-calendar-nav:hover { background: rgba(255, 255, 255, .32); }
+.ha-calendar-today:hover { background: #e6d9f5; }
+.ha-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px 2px;
+  padding: 18px 18px 14px;
+  text-align: center;
+}
+.ha-calendar-weekday {
+  padding: 5px 0 8px;
+  color: var(--ha-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+.ha-calendar-day {
+  position: relative;
+  min-width: 0;
+  height: 48px;
+  border: 2px solid transparent;
+  border-radius: 15px;
+  background: transparent;
+  color: #181126;
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+.ha-calendar-day:hover { background: var(--ha-accent-soft); }
+.ha-calendar-day.is-outside { color: #aaa5b1; }
+.ha-calendar-day.is-today {
+  background: #612c8c;
+  color: #fff;
+}
+.ha-calendar-day.is-selected {
+  border-color: #612c8c;
+  background: #f4eafa;
+  color: #181126;
+}
+.ha-calendar-day.is-today.is-selected {
+  background: #612c8c;
+  color: #fff;
+}
+.ha-calendar-day > i {
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ed5a84;
+  transform: translateX(-50%);
+}
+.ha-calendar-day.is-today > i { background: #fff; }
+.ha-calendar-agenda {
+  margin: 0 18px;
+  padding: 18px 0 14px;
+  border-top: 1px solid #ece5f1;
+}
+.ha-calendar-agenda h3 {
+  margin: 0 0 14px;
+  color: var(--ha-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+.ha-calendar-agenda-list { display: grid; gap: 10px; }
+.ha-calendar-appointment {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 76px;
+  padding: 11px 14px;
+  border: 0;
+  border-radius: 18px;
+  background: #f1e7f8;
+  color: var(--ha-text);
+  text-decoration: none;
+}
+.ha-calendar-appointment:hover { background: #eadcf4; }
+.ha-calendar-time {
+  min-width: 80px;
+  color: var(--ha-accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+.ha-calendar-appointment-info {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ha-calendar-appointment-info strong {
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ha-calendar-appointment-info small {
+  overflow: hidden;
+  color: var(--ha-muted);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ha-calendar-message {
+  margin: 0;
+  padding: 18px 10px;
+  border-radius: 14px;
+  background: #f7f2fa;
+  color: var(--ha-muted);
+  font-size: 12px;
+  text-align: center;
+}
+.ha-calendar-error { color: #b42332; background: #fff1f2; }
+.ha-calendar-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px 18px;
+}
+.ha-calendar-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ha-muted);
+  font-size: 13px;
+}
+.ha-calendar-legend > i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ed5a84;
+}
+
+/* small screens */
+@media (max-width: 991px) {
+  .ha-date { gap: 8px; height: 42px; padding: 0 12px; font-size: 12px; }
+  .ha-who, .ha-caret { display: none; }
+  .ha-profile { padding: 0 8px; }
+  .ha-notif-panel { width: 280px; max-width: calc(100vw - 24px); }
+}
+
+@media (max-width: 480px) {
+  .ha-calendar-panel {
+    position: fixed;
+    top: 64px;
+    right: 12px;
+    width: 424px;
+    max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 76px);
+  }
+  .ha-calendar-month {
+    min-height: 92px;
+    padding: 16px;
+  }
+  .ha-calendar-month-title strong { font-size: 18px; }
+  .ha-calendar-month-title > span { font-size: 12px; }
+  .ha-calendar-grid { padding: 14px 12px 12px; }
+  .ha-calendar-day { height: 42px; }
+  .ha-calendar-agenda { margin: 0 14px; }
+  .ha-calendar-footer { padding: 10px 14px 14px; }
+}

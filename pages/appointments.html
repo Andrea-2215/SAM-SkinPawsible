@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <script>(function () { var role = localStorage.getItem("userRole"); if (role) document.documentElement.setAttribute("data-role", role); }());</script>
+  <script>
+    const role = localStorage.getItem("userRole");
+    if (role) document.documentElement.setAttribute("data-role", role);
+    if (role === "superadmin") {
+      document.documentElement.classList.add("role-superadmin");
+    } else if (role) {
+      document.documentElement.classList.add("role-clinic");
+    }
+    if (localStorage.getItem("userName") && localStorage.getItem("userRoleLabel")) {
+      document.documentElement.classList.add("header-ready");
+    }
+  </script>
+  <style>
+    html.role-superadmin .sidebar .nav-item:has(> .nav-link[href="pet-records.html"]),
+    html.role-superadmin .sidebar .nav-item:has(> .nav-link[href="scan-records.html"]),
+    html.role-superadmin .sidebar .nav-item:has(> .nav-link[href="consultations.html"]) { display: none !important; }
+    html.role-superadmin #adminNavigation { display: block !important; }
+    html:not(.header-ready) .ha-profile { visibility: hidden; }
+  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Appointments · SkinPawsible</title>
+  <link rel="icon" type="image/jpeg" href="../images/LOGO.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- SkinPawsible CSS -->
+  <link href="../css/style.css" rel="stylesheet">
+  <link href="../css/app-shell.css?v=9" rel="stylesheet">
+  <link href="../css/header-actions.css?v=2" rel="stylesheet">
+  <link href="../css/appointments.css?v=8" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- APP LAYOUT -->
+  <div class="app-layout">
+
+    <!-- SHARED SIDEBAR -->
+    <div id="sidebar-container"></div>
+    <script src="../js/sidebar-ui.js?v=6"></script>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <!-- TOPBAR -->
+      <div class="topbar topbar-stacked">
+        <div class="topbar-search-row">
+          <div class="cs-search">
+            <i class="bi bi-search"></i>
+            <input
+              type="search"
+              id="appointmentSearch"
+              placeholder="Search pet, owner, or concern"
+              aria-label="Search appointments"
+            >
+          </div>
+          <div class="topbar-actions">
+            <button
+              type="button"
+              class="vet-questions-trigger"
+              id="vetQuestionsToggle"
+              aria-controls="vetQuestionsDrawer"
+              aria-expanded="false"
+              hidden
+            >
+              <i class="bi bi-chat-left-text" aria-hidden="true"></i>
+              Staff questions
+              <span class="vet-questions-count" id="vetQuestionsCount" hidden></span>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <h1 class="page-title">Appointments</h1>
+        </div>
+      </div>
+
+      <!-- SUMMARY CARDS -->
+      <div class="cs-stats">
+
+        <div class="cs-stat">
+          <span class="cs-stat-icon cs-ic-amber"><i class="bi bi-hourglass-split"></i></span>
+          <div>
+            <strong id="statPending">0</strong>
+            <span>Pending requests</span>
+          </div>
+        </div>
+
+        <div class="cs-stat">
+          <span class="cs-stat-icon cs-ic-purple"><i class="bi bi-calendar-event"></i></span>
+          <div>
+            <strong id="statTomorrow">0</strong>
+            <span>Visits tomorrow</span>
+          </div>
+        </div>
+
+        <div class="cs-stat">
+          <span class="cs-stat-icon cs-ic-green"><i class="bi bi-bell"></i></span>
+          <div>
+            <strong id="statReminders">0</strong>
+            <span>Reminders sent this week</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- APPOINTMENT REQUESTS CARD -->
+      <div class="table-card">
+
+        <div class="cs-bar">
+
+          <div class="cs-chips" role="group" aria-label="Filter appointments by status">
+            <button type="button" class="cs-chip active" data-filter="all" aria-pressed="true">All</button>
+            <button type="button" class="cs-chip" data-filter="pending" aria-pressed="false">Pending</button>
+            <button type="button" class="cs-chip" data-filter="approved" aria-pressed="false">Confirmed</button>
+            <button type="button" class="cs-chip" data-filter="completed" aria-pressed="false">Completed</button>
+            <button type="button" class="cs-chip" data-filter="cancelled" aria-pressed="false">Cancelled</button>
+          </div>
+
+          <div class="cs-date-filter">
+            <button
+              type="button"
+              class="cs-date-filter-toggle"
+              id="appointmentDateFilterToggle"
+              aria-expanded="false"
+              aria-controls="appointmentDateFilterPanel"
+            >
+              <i class="bi bi-calendar3" aria-hidden="true"></i>
+              Date
+              <i class="bi bi-chevron-down cs-date-filter-chevron" aria-hidden="true"></i>
+            </button>
+            <div class="cs-date-filter-panel" id="appointmentDateFilterPanel" hidden>
+              <label class="cs-date-field">
+                <span>From</span>
+                <input type="date" id="appointmentDateFrom" aria-label="Filter appointments scheduled from date">
+              </label>
+              <label class="cs-date-field">
+                <span>To</span>
+                <input type="date" id="appointmentDateTo" aria-label="Filter appointments scheduled through date">
+              </label>
+              <button type="button" class="cs-date-reset" id="appointmentDateReset">
+                Clear dates
+              </button>
+            </div>
+          </div>
+
+          <button type="button" class="cs-btn" id="bulkRemindBtn">
+            <i class="bi bi-bell"></i>
+            Remind tomorrow's visits (<span id="bulkCount">0</span>)
+          </button>
+
+          <div class="cs-admin-controls" id="appointmentAdminControls"></div>
+
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-responsive">
+
+          <table class="table cs-table">
+
+            <thead>
+              <tr>
+                <th>Pet</th>
+                <th>Concern</th>
+                <th>Schedule</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody id="appointmentsTable">
+              <tr>
+                <td colspan="5" class="cs-message">
+                  Loading appointments...
+                </td>
+              </tr>
+            </tbody>
+
+          </table>
+
+        </div>
+
+        <div class="cs-list-controls">
+          <button type="button" class="cs-show-more" id="appointmentsShowMore" hidden>
+            Show remaining appointments
+          </button>
+        </div>
+        <div class="cs-footer" id="appointmentFooter">Showing 0 of 0 appointments</div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <div class="vet-questions-backdrop" id="vetQuestionsBackdrop" hidden></div>
+  <aside
+    class="vet-questions-drawer"
+    id="vetQuestionsDrawer"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="vetQuestionsTitle"
+    aria-describedby="vetQuestionsDescription"
+    aria-hidden="true"
+    inert
+  >
+    <div class="vet-questions-drawer-header">
+      <div>
+        <h2 id="vetQuestionsTitle">Questions from staff</h2>
+        <p id="vetQuestionsDescription">Your answer returns to the original consultation as an internal note.</p>
+      </div>
+      <button type="button" class="vet-questions-close" id="vetQuestionsClose" aria-label="Close staff questions">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="vet-questions-drawer-content">
+      <div id="vetQuestionsOpen"></div>
+      <h3 class="vet-questions-answered-title">Answered</h3>
+      <div id="vetQuestionsAnswered"></div>
+    </div>
+  </aside>
+
+  <!-- REMINDER POPUP -->
+  <div class="modal fade" id="reminderModal" tabindex="-1" aria-labelledby="reminderModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content cs-modal">
+
+        <div class="modal-header">
+          <div>
+            <h5 class="modal-title" id="reminderModalTitle">Send appointment reminder</h5>
+            <p class="cs-modal-sub" id="reminderSubtitle"></p>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <label class="cs-label" for="reminderMessage">Message</label>
+          <textarea id="reminderMessage" class="cs-textarea" rows="4"></textarea>
+
+          <span class="cs-label">When to send</span>
+          <div class="cs-opts">
+            <label class="cs-opt"><input type="radio" name="reminderWhen" value="now" checked> Send now</label>
+            <label class="cs-opt"><input type="radio" name="reminderWhen" value="day"> 1 day before</label>
+            <label class="cs-opt"><input type="radio" name="reminderWhen" value="hour"> 1 hour before</label>
+          </div>
+
+          <div class="cs-preview">
+            <span class="cs-preview-icon"><i class="bi bi-bell-fill"></i></span>
+            <div>
+              <strong>SkinPawsible</strong>
+              <small>Push notification preview</small>
+              <span id="reminderPreview"></span>
+            </div>
+          </div>
+
+          <div class="cs-error" id="reminderError" hidden></div>
+
+        </div>
+
+        <div class="modal-footer">
+          <span class="cs-hint">Also saved to the owner's notifications inside the app.</span>
+          <button type="button" class="cs-btn" id="reminderSendBtn">
+            <i class="bi bi-send"></i> Send reminder
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- CANCEL APPOINTMENT POPUP -->
+  <div class="modal fade" id="cancelAppointmentModal" tabindex="-1" aria-labelledby="cancelAppointmentModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content cs-modal">
+
+        <div class="modal-header">
+          <div>
+            <h5 class="modal-title" id="cancelAppointmentModalTitle">Cancel appointment</h5>
+            <p class="cs-modal-sub">Let the pet owner know why this appointment is being cancelled.</p>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <form id="cancelAppointmentForm">
+          <div class="modal-body">
+            <label class="cs-label" for="cancelReason">Reason for cancellation <span aria-hidden="true">*</span></label>
+            <textarea
+              id="cancelReason"
+              class="cs-textarea"
+              rows="5"
+              maxlength="1000"
+              placeholder="Enter the reason the staff member or veterinarian is cancelling this request..."
+              required
+            ></textarea>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Keep appointment</button>
+            <button type="submit" class="cs-btn cs-btn-danger" id="cancelAppointmentSubmit">
+              <i class="bi bi-x-lg"></i> Cancel appointment
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- RESCHEDULE APPOINTMENT POPUP -->
+  <div class="modal fade" id="rescheduleAppointmentModal" tabindex="-1" aria-labelledby="rescheduleAppointmentModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content cs-modal">
+
+        <div class="modal-header">
+          <div>
+            <h5 class="modal-title" id="rescheduleAppointmentModalTitle">Reschedule appointment</h5>
+            <p class="cs-modal-sub">Choose a new date and time. The pet owner will be notified.</p>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <form id="rescheduleAppointmentForm">
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <label class="cs-label" for="rescheduleDate">New date <span aria-hidden="true">*</span></label>
+                <input type="date" id="rescheduleDate" class="form-control" required>
+              </div>
+              <div class="col-sm-6">
+                <label class="cs-label" for="rescheduleTime">New time <span aria-hidden="true">*</span></label>
+                <input type="time" id="rescheduleTime" class="form-control" required>
+              </div>
+            </div>
+            <div class="cs-hint">The original appointment will be marked as cancelled and kept in the appointment history.</div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Keep appointment</button>
+            <button type="submit" class="cs-btn" id="rescheduleAppointmentSubmit">
+              <i class="bi bi-calendar2-check"></i> Confirm new schedule
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- SHARED HEADER (must be before sidebar.js) -->
+  <script type="module" src="../js/header-actions.js?v=6"></script>
+
+  <!-- SHARED SIDEBAR JAVASCRIPT -->
+  <script type="module" src="../js/sidebar.js?v=13"></script>
+
+  <!-- APPOINTMENTS JAVASCRIPT -->
+  <script type="module" src="../js/appointments.js?v=14"></script>
+
+</body>
+</html>

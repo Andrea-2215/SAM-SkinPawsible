@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <script>(function () { var role = localStorage.getItem("userRole"); if (role) document.documentElement.setAttribute("data-role", role); }());</script>
+  <script>
+    const role = localStorage.getItem("userRole");
+    if (role) document.documentElement.setAttribute("data-role", role);
+    if (role === "superadmin") {
+      document.documentElement.classList.add("role-superadmin");
+    } else if (role) {
+      document.documentElement.classList.add("role-clinic");
+    }
+    if (localStorage.getItem("userName") && localStorage.getItem("userRoleLabel")) {
+      document.documentElement.classList.add("header-ready");
+    }
+  </script>
+  <style>
+    html.role-superadmin .sidebar .nav-item:has(> .nav-link[href="pet-records.html"]),
+    html.role-superadmin .sidebar .nav-item:has(> .nav-link[href="scan-records.html"]),
+    html.role-superadmin .sidebar .nav-item:has(> .nav-link[href="consultations.html"]) { display: none !important; }
+    html.role-superadmin #adminNavigation { display: block !important; }
+    html:not(.header-ready) .ha-profile { visibility: hidden; }
+  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Scan Records · SkinPawsible</title>
+  <link rel="icon" type="image/jpeg" href="../images/LOGO.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+  <!-- Bootstrap Icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+  >
+
+  <!-- SkinPawsible CSS -->
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/app-shell.css?v=9">
+  <link rel="stylesheet" href="../css/header-actions.css?v=2">
+  <link rel="stylesheet" href="../css/scan-records.css?v=5">
+</head>
+
+<body>
+
+  <!-- APP LAYOUT -->
+  <div class="app-layout">
+
+    <!-- SHARED SIDEBAR -->
+    <div id="sidebar-container"></div>
+    <script src="../js/sidebar-ui.js?v=6"></script>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <!-- TOPBAR -->
+      <div class="topbar topbar-stacked">
+        <div class="topbar-search-row">
+          <div class="sr-search">
+            <i class="bi bi-search"></i>
+            <input
+              type="search"
+              id="scanSearch"
+              placeholder="Search pet name, owner, or result"
+              aria-label="Search by pet name, pet owner, or scan result"
+            >
+          </div>
+          <div class="topbar-actions"></div>
+        </div>
+
+        <div>
+          <h1 class="page-title">
+            Scan Records
+          </h1>
+        </div>
+      </div>
+
+
+      <!-- SCAN RECORDS CARD -->
+      <div class="table-card">
+
+        <!-- FILTERS -->
+        <div class="sr-toolbar">
+
+          <div class="sr-filter-options" role="group" aria-label="Filter scans by condition">
+            <button type="button" class="sr-filter active" data-filter="all" aria-pressed="true">
+              <i class="bi bi-grid-fill" aria-hidden="true"></i> All
+            </button>
+            <button type="button" class="sr-filter" data-filter="healthy" aria-pressed="false">
+              <i class="bi bi-check-circle-fill" aria-hidden="true"></i> Healthy
+            </button>
+            <button type="button" class="sr-filter" data-filter="ringworm" aria-pressed="false">
+              <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i> Ringworm
+            </button>
+            <button type="button" class="sr-filter" data-filter="yeast" aria-pressed="false">
+              <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i> Yeast dermatitis
+            </button>
+          </div>
+
+          <div class="sr-date-filter">
+            <button
+              type="button"
+              class="sr-date-filter-toggle"
+              id="scanDateFilterToggle"
+              aria-expanded="false"
+              aria-controls="scanDateFilterPanel"
+            >
+              <i class="bi bi-calendar3" aria-hidden="true"></i>
+              Date
+              <i class="bi bi-chevron-down sr-filter-chevron" aria-hidden="true"></i>
+            </button>
+            <div class="sr-date-filter-panel" id="scanDateFilterPanel" hidden>
+              <label class="sr-date-field">
+                <span>From</span>
+                <input type="date" id="scanDateFrom" aria-label="Filter scans from date">
+              </label>
+              <label class="sr-date-field">
+                <span>To</span>
+                <input type="date" id="scanDateTo" aria-label="Filter scans through date">
+              </label>
+              <button type="button" class="sr-date-reset" id="scanDateReset">
+                Clear dates
+              </button>
+            </div>
+          </div>
+
+          <div class="sr-date-sort" role="group" aria-label="Sort scans by date">
+            <button type="button" class="sr-filter active" id="scanSortNewest" aria-pressed="true">
+              <i class="bi bi-sort-down" aria-hidden="true"></i> Newest
+            </button>
+            <button type="button" class="sr-filter" id="scanSortOldest" aria-pressed="false">
+              <i class="bi bi-sort-up" aria-hidden="true"></i> Oldest
+            </button>
+          </div>
+
+          <div class="sr-toolbar-actions">
+            <button
+              type="button"
+              id="downloadScanReportBtn"
+              class="btn btn-sm btn-outline-success"
+              aria-label="Download visible scan records as an Excel report"
+              title="Download the currently visible scan records as an Excel workbook"
+              disabled
+            >
+              <i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i>
+              Download Excel Report
+            </button>
+          </div>
+
+        </div>
+
+
+        <!-- TABLE -->
+        <div class="table-responsive">
+
+          <table class="table sr-table">
+
+            <thead>
+              <tr>
+                <th>Scan</th>
+                <th>Result</th>
+                <th>Confidence Level</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+
+            <tbody id="scanRecordsTable">
+
+              <tr>
+                <td
+                  colspan="4"
+                  class="sr-message"
+                >
+                  Loading scan records...
+                </td>
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+        <div class="record-list-controls">
+          <button type="button" class="record-list-show-more" id="scanRecordsShowMore" hidden>
+            Show remaining scan records
+          </button>
+        </div>
+        <div class="sr-footer" id="scanFooter">Showing 0 of 0 scans</div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <div
+    class="modal fade"
+    id="scanImageDialog"
+    tabindex="-1"
+    aria-labelledby="scanImageDialogTitle"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered sr-image-dialog">
+      <div class="modal-content sr-image-dialog-content">
+        <div class="modal-header sr-image-dialog-header">
+          <h2 class="modal-title fs-6" id="scanImageDialogTitle">Scan photo preview</h2>
+          <button
+            class="btn-close btn-close-white"
+            type="button"
+            data-bs-dismiss="modal"
+            aria-label="Close image preview"
+          ></button>
+        </div>
+        <div class="modal-body sr-image-dialog-body">
+          <div class="sr-image-zoom-controls" aria-label="Image zoom controls">
+            <button
+              class="btn btn-sm btn-outline-light"
+              id="scanImageZoomOut"
+              type="button"
+              aria-label="Zoom out"
+              title="Zoom out"
+            ><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
+            <span class="sr-image-zoom-level" id="scanImageZoomLevel" aria-live="polite">100%</span>
+            <button
+              class="btn btn-sm btn-outline-light"
+              id="scanImageZoomIn"
+              type="button"
+              aria-label="Zoom in"
+              title="Zoom in"
+            ><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
+            <button
+              class="btn btn-sm btn-outline-light"
+              id="scanImageZoomReset"
+              type="button"
+            >Reset</button>
+          </div>
+          <div class="sr-image-stage">
+            <img id="scanImagePreview" alt="">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JavaScript -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  ></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
+  <!-- SHARED HEADER (must be before sidebar.js) -->
+  <script type="module" src="../js/header-actions.js?v=6"></script>
+
+  <!-- SHARED SIDEBAR JAVASCRIPT -->
+  <script
+    type="module"
+    src="../js/sidebar.js?v=13"
+  ></script>
+
+  <!-- SCAN RECORDS JAVASCRIPT -->
+  <script
+    type="module"
+    src="../js/scan-records.js?v=14"
+  ></script>
+
+</body>
+</html>

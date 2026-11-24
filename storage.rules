@@ -1,0 +1,32 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isWebUser() {
+      return request.auth != null
+             && firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
+             && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role
+                  in ["admin", "staff", "vet", "veterinarian"]
+             && (!("status" in firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data)
+                 || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.status in ["Active", "active"]);
+    }
+
+    function isActiveOwner(userId) {
+      return request.auth != null
+             && request.auth.uid == userId
+             && firestore.exists(/databases/(default)/documents/users/$(userId))
+             && firestore.get(/databases/(default)/documents/users/$(userId)).data.role in ["petOwner", "owner", "user"]
+             && (!("status" in firestore.get(/databases/(default)/documents/users/$(userId)).data)
+                 || firestore.get(/databases/(default)/documents/users/$(userId)).data.status in ["Active", "active"]);
+    }
+
+    match /medical-history/{userId}/{petId}/{fileName} {
+      allow read: if isWebUser() || isActiveOwner(userId);
+      allow create: if isWebUser()
+                    && request.resource.size > 0
+                    && request.resource.size <= 10 * 1024 * 1024
+                    && request.resource.contentType == "application/pdf";
+      allow update: if false;
+      allow delete: if isWebUser();
+    }
+  }
+}
